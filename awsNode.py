@@ -14,26 +14,32 @@ key = paramiko.RSAKey.from_private_key_file(key_path)
 client = paramiko.SSHClient()
 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-aws_key = "" #raw_input("Enter AWS access key: ")
-secret_key = ""#raw_input("Enter AWS secret key: ")
+aws_key = "AKIAIWRMMLV6TWIQPG2Q" #raw_input("Enter AWS access key: ")
+secret_key = "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"#raw_input("Enter AWS secret key: ")
 ec2 = boto3.client('ec2', aws_access_key_id=aws_key, aws_secret_access_key=secret_key)
 image = "ami-064e11d4ce7440c91"
 
-def startGeth(_client, _ip, _key):
+response = ec2.describe_vpcs()
+vpc_id = response.get('Vpcs', [{}])[0].get('VpcId', '')
+
+def startGeth(_client):
     try:
         # Here 'ubuntu' is user name and 'instance_ip' is public IP of EC2
-        client.connect(hostname=ip, username="ubuntu", pkey=key)
-        client.exec_command('geth --rinkeby')
+        # client.exec_command()
+
+        sshcmd = '"geth --rinkeby"'
+        cmd = "gnome-terminal -e 'ssh -i {0} {1}@{2} {3}'".format(key_path, "ubuntu", ip, sshcmd)
+        os.system("{0} ".format(cmd))
         print "Geth started..."
+
     except Exception, e:
         print e
 
-def attachGeth(_key_path, _ip):
+def attachGeth(_client):
     try:
-        # Here 'ubuntu' is user name and 'instance_ip' is public IP of EC2
-        cmd = "ssh -t -i {0} {1}@{2}".format(key_path, "ubuntu", ip)
-        subprocess.call(cmd, shell=True)
-
+        sshcmd = '"geth attach ipc:/home/ubuntu/.ethereum/rinkeby/geth.ipc"'
+        cmd = "gnome-terminal -e 'ssh -i {0} {1}@{2} {3}'".format(key_path, "ubuntu", ip, sshcmd)
+        os.system("{0} ".format(cmd))
     except Exception, e:
         print e
 
@@ -57,12 +63,13 @@ def checkForInstance(_ec2, _image):
 ip = ec2.describe_instances()['Reservations'][0]['Instances'][0]['NetworkInterfaces'][0]['Association']['PublicDnsName']
 print ip
 # Connect/ssh to an instance
+client.connect(hostname=ip, username="ubuntu", pkey=key)
 
-thread.start_new_thread(startGeth, (client, ip, key))
+startGeth(client)
 
 time.sleep(3)
-#thread.start_new_thread(attachGeth, (key_path, ip))'''
-#attachGeth(client, ip, key)
+
+attachGeth(client)
 
 
 exit = raw_input("enter to exit");
