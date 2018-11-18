@@ -14,8 +14,8 @@ key = paramiko.RSAKey.from_private_key_file(key_path)
 client = paramiko.SSHClient()
 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-aws_key = "AKIAIWRMMLV6TWIQPG2Q" #raw_input("Enter AWS access key: ")
-secret_key = "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"#raw_input("Enter AWS secret key: ")
+aws_key = "" #raw_input("Enter AWS access key: ")
+secret_key = ""#raw_input("Enter AWS secret key: ")
 ec2 = boto3.client('ec2', aws_access_key_id=aws_key, aws_secret_access_key=secret_key)
 image = "ami-064e11d4ce7440c91"
 
